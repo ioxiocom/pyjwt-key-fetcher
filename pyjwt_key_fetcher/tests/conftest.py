@@ -152,8 +152,12 @@ class MockHTTPClient(HTTPClient):
 
 @pytest.fixture
 def create_provider_fetcher_and_client():
-    async def _create(valid_issuers=None):
-        provider = MockProvider()
+    async def _create(
+        valid_issuers=None,
+        iss: str = "https://example.com",
+        aud: str = "default_audience",
+    ):
+        provider = MockProvider(iss=iss, aud=aud)
         http_client = MockHTTPClient(provider=provider)
         fetcher = AsyncKeyFetcher(valid_issuers=valid_issuers, http_client=http_client)
         return provider, fetcher, http_client

@@ -33,12 +33,12 @@ class AsyncKeyFetcher:
     @staticmethod
     def get_kid(token: str) -> str:
         """
-        Get the kid from the token
+        Get the kid from the token.
 
         :param token: The JWT token.
-        :return: The kid (key id) from the token
+        :return: The kid (key id) from the token.
         :raise JWTFormatException: If the token doesn't have a "kid".
-        :raise PyJWTError: If the token can't be decoded
+        :raise PyJWTError: If the token can't be decoded.
         """
         jwt_headers = jwt.get_unverified_header(token)
         try:
@@ -49,12 +49,12 @@ class AsyncKeyFetcher:
 
     def _get_issuer(self, token: str) -> str:
         """
-        Get the issuer from the token (without verification)
+        Get the issuer from the token (without verification).
 
         :param token: The JWT token (as a string).
         :return: The issuer.
         :raise JWTFormatException: If the token doesn't have a valid "iss".
-        :raise PyJWTError: If the token cant be decoded.
+        :raise PyJWTError: If the token can't be decoded.
         """
         payload = jwt.decode(token, options={"verify_signature": False})
         try:
@@ -105,6 +105,8 @@ class AsyncKeyFetcher:
 
         :param iss: The issuer
         :return: A mapping of kid: {<data_for_the_kid>}
+        :raise JWTHTTPFetchError: If there's a problem fetching the data.
+        :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
         """
         jwks_uri = await self._get_jwks_uri_from_iss(iss)
         data = await self.http_client.get_json(jwks_uri)
@@ -124,6 +126,8 @@ class AsyncKeyFetcher:
         :param iss: The "iss" (issuer) of the JWT.
         :param kid: The "kid" (key id) from the header of the JWT.
         :return: The key.
+        :raise JWTHTTPFetchError: If there's a problem fetching the data.
+        :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
         """
         jwks = await self._get_jwks(iss)
         return Key(jwks[kid])
@@ -134,6 +138,11 @@ class AsyncKeyFetcher:
 
         :param token: The JWT as a string.
         :return: The key.
+        :raise JWTFormatException: If the token doesn't have a "kid".
+        :raise JWTFormatException: If the token doesn't have a valid "iss".
+        :raise JWTHTTPFetchError: If there's a problem fetching the data.
+        :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
+        :raise PyJWTError: If the token can't be decoded.
         """
         kid = self.get_kid(token)
         iss = self._get_issuer(token)

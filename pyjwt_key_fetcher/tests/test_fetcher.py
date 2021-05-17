@@ -1,6 +1,8 @@
 import jwt
 import pytest
 
+from pyjwt_key_fetcher.errors import JWTFormatError
+
 
 @pytest.mark.asyncio
 async def test_fetching_key(create_provider_fetcher_and_client):
@@ -79,3 +81,27 @@ async def test_fetching_from_multiple_issuers(
     # Verify we've fetched config and JWKs twice (once per issuer)
     assert client.get_openid_configuration.call_count == 2
     assert client.get_jwks.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_issuer_validation(create_provider_fetcher_and_client, create_provider):
+    valid_issuers = ["https://valid.example.com"]
+
+    invalid_provider, fetcher, client = await create_provider_fetcher_and_client(
+        valid_issuers=valid_issuers, iss="https://invalid.example.com"
+    )
+    valid_provider = create_provider(client, iss=valid_issuers[0])
+
+    invalid_token = invalid_provider.create_token()
+    valid_token = valid_provider.create_token()
+
+    with pytest.raises(JWTFormatError):
+        await fetcher.get_key(invalid_token)
+    assert client.get_openid_configuration.call_count == 0
+    assert client.get_jwks.call_count == 0
+
+    key_entry = await fetcher.get_key(valid_token)
+    jwt.decode(valid_token, audience=valid_provider.aud, **key_entry)
+
+    assert client.get_openid_configuration.call_count == 1
+    assert client.get_jwks.call_count == 1
