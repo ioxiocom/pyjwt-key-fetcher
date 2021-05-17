@@ -9,7 +9,7 @@ from pyjwt_key_fetcher.errors import JWTFormatError, JWTOpenIDConnectError
 from pyjwt_key_fetcher.http_client import DefaultHTTPClient, HTTPClient
 
 
-class KeyWrapper(collections.abc.Mapping):
+class Key(collections.abc.Mapping):
     """
     Wrapper for the JWT key and algorithm.
     """
@@ -63,7 +63,9 @@ class KeyFetcher:
 
         # Apply the a.lru_cache decorator without syntactic sugar to be able to
         # customize the maxsize
-        self.get_key = a.lru_cache(maxsize=cache_maxsize)(self.get_key)
+        self.get_key_by_iss_and_kid = a.lru_cache(maxsize=cache_maxsize)(
+            self.get_key_by_iss_and_kid
+        )
 
     @staticmethod
     def _get_kid(token: str) -> str:
@@ -152,12 +154,25 @@ class KeyFetcher:
 
         return jwk_map
 
-    async def get_key(self, iss, kid) -> KeyWrapper:
-        jwks = await self._get_jwks(iss)
-        return KeyWrapper(jwks[kid])
+    async def get_key_by_iss_and_kid(self, iss: str, kid: str) -> Key:
+        """
+        Get the key based on "iss" and "kid".
 
-    async def get_key_from_token(self, token: str) -> KeyWrapper:
+        :param iss: The "iss" (issuer) of the JWT.
+        :param kid: The "kid" (key id) from the header of the JWT.
+        :return: The key.
+        """
+        jwks = await self._get_jwks(iss)
+        return Key(jwks[kid])
+
+    async def get_key(self, token: str) -> Key:
+        """
+        Get the key based on given token.
+
+        :param token: The JWT as a string.
+        :return: The key.
+        """
         kid = self._get_kid(token)
         iss = self._get_issuer(token)
-        key = await self.get_key(iss=iss, kid=kid)
+        key = await self.get_key_by_iss_and_kid(iss=iss, kid=kid)
         return key
