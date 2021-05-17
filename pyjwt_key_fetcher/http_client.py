@@ -43,12 +43,12 @@ class DefaultHTTPClient(HTTPClient):
         if not (url.startswith("https://") or url.startswith("http://")):
             raise JWTHTTPFetchError("Unsupported protocol in 'iss'")
 
-        async with self.session.get(url) as resp:
-            try:
+        try:
+            async with self.session.get(url) as resp:
                 data = await resp.json()
-            except aiohttp.ClientError as e:
-                raise JWTHTTPFetchError(f"Failed to fetch or decode {url}") from e
-            if resp.status != 200:
-                raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
+                if resp.status != 200:
+                    raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
+        except aiohttp.ClientError as e:
+            raise JWTHTTPFetchError(f"Failed to fetch or decode {url}") from e
 
         return data
