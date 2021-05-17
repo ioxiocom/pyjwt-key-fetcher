@@ -10,7 +10,7 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from pyjwt_key_fetcher import KeyFetcher
+from pyjwt_key_fetcher import AsyncKeyFetcher
 from pyjwt_key_fetcher.errors import JWTHTTPFetchError
 from pyjwt_key_fetcher.http_client import HTTPClient
 from pyjwt_key_fetcher.utils import unsigned_int_to_urlsafe_b64
@@ -106,12 +106,11 @@ class MockHTTPClient(HTTPClient):
     A mock client used for tests.
     """
 
-    BASE_URL = "https://example.com"
-    OPENID_CONFIG_URL = f"{BASE_URL}/.well-known/openid-configuration"
-    JWKS_URL = f"{BASE_URL}/.well-known/jwks"
+    OPENID_CONFIG_PATH = "/.well-known/openid-configuration"
+    JWKS_URL = "/.well-known/jwks"
 
     def __init__(self, provider: MockProvider) -> None:
-        self.provider = provider
+        self.providers = {provider.iss: provider}
         self.get_jwks = MagicMock(wraps=self.get_jwks)
         self.get_openid_configuration = MagicMock(wraps=self.get_openid_configuration)
 
@@ -126,19 +125,28 @@ class MockHTTPClient(HTTPClient):
         if not (url.startswith("https://") or url.startswith("http://")):
             raise JWTHTTPFetchError("Unsupported protocol in 'iss'")
 
-        if url == self.OPENID_CONFIG_URL:
-            return self.get_openid_configuration()
-        elif url == self.JWKS_URL:
-            return self.get_jwks()
+        for _, provider in self.providers.items():
+            if url.startswith(provider.iss):
+                break
+        else:
+            raise JWTHTTPFetchError(
+                f"Sorry, {self.__class__.__name__} doesn't know how to fake a "
+                f"connection to '{url}'"
+            )
+
+        if url == provider.iss + self.OPENID_CONFIG_PATH:
+            return self.get_openid_configuration(provider)
+        elif url == provider.iss + self.JWKS_URL:
+            return self.get_jwks(provider)
         else:
             raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
 
-    def get_jwks(self) -> Dict[str, Any]:
-        return self.provider.get_jwks()
+    def get_jwks(self, provider: MockProvider) -> Dict[str, Any]:
+        return provider.get_jwks()
 
-    def get_openid_configuration(self) -> Dict[str, Any]:
+    def get_openid_configuration(self, provider: MockProvider) -> Dict[str, Any]:
         return {
-            "jwks_uri": self.JWKS_URL,
+            "jwks_uri": provider.iss + self.JWKS_URL,
         }
 
 
@@ -147,7 +155,21 @@ def create_provider_fetcher_and_client():
     async def _create(valid_issuers=None):
         provider = MockProvider()
         http_client = MockHTTPClient(provider=provider)
-        fetcher = KeyFetcher(valid_issuers=valid_issuers, http_client=http_client)
+        fetcher = AsyncKeyFetcher(valid_issuers=valid_issuers, http_client=http_client)
         return provider, fetcher, http_client
+
+    return _create
+
+
+@pytest.fixture
+def create_provider():
+    def _create(
+        http_client: MockHTTPClient,
+        iss: str = "https://another.example.com",
+        aud: str = "another_aud",
+    ) -> MockProvider:
+        provider = MockProvider(iss=iss, aud=aud)
+        http_client.providers[iss] = provider
+        return provider
 
     return _create

@@ -58,3 +58,24 @@ async def test_fetching_after_issuing_new_key(create_provider_fetcher_and_client
     # Verify we've fetched config and JWKs only twice (once per "kid")
     assert client.get_openid_configuration.call_count == 2
     assert client.get_jwks.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_fetching_from_multiple_issuers(
+    create_provider_fetcher_and_client, create_provider
+):
+    provider, fetcher, client = await create_provider_fetcher_and_client()
+
+    provider_2 = create_provider(client)
+
+    token = provider.create_token()
+    token_2 = provider_2.create_token()
+
+    key_entry = await fetcher.get_key(token)
+    key_entry_2 = await fetcher.get_key(token_2)
+    jwt.decode(token, audience=provider.aud, **key_entry)
+    jwt.decode(token_2, audience=provider_2.aud, **key_entry_2)
+
+    # Verify we've fetched config and JWKs twice (once per issuer)
+    assert client.get_openid_configuration.call_count == 2
+    assert client.get_jwks.call_count == 2
