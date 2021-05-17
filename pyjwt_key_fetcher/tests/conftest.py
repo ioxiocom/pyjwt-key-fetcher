@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from functools import cached_property
 from hashlib import sha256
 from typing import Any, Dict, Optional
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import jwt
@@ -103,6 +104,8 @@ class MockHTTPClient(HTTPClient):
 
     def __init__(self, provider: MockProvider) -> None:
         self.provider = provider
+        self.get_jwks = MagicMock(wraps=self.get_jwks)
+        self.get_openid_configuration = MagicMock(wraps=self.get_openid_configuration)
 
     async def get_json(self, url: str) -> Dict[str, Any]:
         """
@@ -122,10 +125,10 @@ class MockHTTPClient(HTTPClient):
         else:
             raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
 
-    def get_jwks(self):
+    def get_jwks(self) -> Dict[str, Any]:
         return self.provider.get_jwks()
 
-    def get_openid_configuration(self):
+    def get_openid_configuration(self) -> Dict[str, Any]:
         return {
             "jwks_uri": self.JWKS_URL,
         }

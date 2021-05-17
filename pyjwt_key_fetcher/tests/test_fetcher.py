@@ -9,3 +9,6 @@ async def test_fetching_key(create_provider_fetcher_and_client):
     token = provider.create_token()
     key_entry = await fetcher.get_key_from_token(token)
     jwt.decode(token, audience=provider.aud, **key_entry)
+
+    client.get_openid_configuration.assert_called_once()
+    client.get_jwks.assert_called_once()
