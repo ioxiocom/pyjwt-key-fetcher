@@ -1,6 +1,7 @@
 import collections.abc
 from typing import Any, Dict, Iterable, Iterator, Optional
 
+import asyncstdlib as a
 import jwt
 from jwt import PyJWK
 
@@ -46,7 +47,10 @@ class KeyWrapper(collections.abc.Mapping):
 
 class KeyFetcher:
     def __init__(
-        self, valid_issuers: Optional[Iterable] = None, http_client: HTTPClient = None
+        self,
+        valid_issuers: Optional[Iterable] = None,
+        http_client: HTTPClient = None,
+        cache_maxsize: int = 128,
     ) -> None:
 
         if not http_client:
@@ -56,6 +60,10 @@ class KeyFetcher:
         if not valid_issuers:
             valid_issuers = set()
         self.valid_issuers = set(valid_issuers)
+
+        # Apply the a.lru_cache decorator without syntactic sugar to be able to
+        # customize the maxsize
+        self.get_key = a.lru_cache(maxsize=cache_maxsize)(self.get_key)
 
     @staticmethod
     def _get_kid(token: str) -> str:
