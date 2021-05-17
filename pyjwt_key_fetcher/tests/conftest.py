@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import jwt
 import pytest
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from pyjwt_key_fetcher import KeyFetcher
@@ -48,15 +49,22 @@ class RSAPrivateKeyWrapper:
             "e": self.e,
         }
 
+    @cached_property
+    def public_pem(self) -> bytes:
+        return self.privkey.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+
 
 class MockProvider:
     def __init__(self, iss: str = "https://example.com", aud: str = "default_audience"):
         self.iss = iss
         self.aud = aud
         self.keys = []
-        self.generate_key()
+        self.generate_new_key()
 
-    def generate_key(self):
+    def generate_new_key(self):
         self.keys.insert(0, RSAPrivateKeyWrapper())
 
     @property

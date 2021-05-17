@@ -68,7 +68,7 @@ class KeyFetcher:
         )
 
     @staticmethod
-    def _get_kid(token: str) -> str:
+    def get_kid(token: str) -> str:
         """
         Get the kid from the token
 
@@ -172,7 +172,7 @@ class KeyFetcher:
         :param token: The JWT as a string.
         :return: The key.
         """
-        kid = self._get_kid(token)
+        kid = self.get_kid(token)
         iss = self._get_issuer(token)
         key = await self.get_key_by_iss_and_kid(iss=iss, kid=kid)
         return key
