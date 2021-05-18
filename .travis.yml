@@ -1,0 +1,34 @@
+language: python
+python:
+  - 3.8
+  - 3.9
+cache:
+  pip: true
+  directories:
+    - '$HOME/.cache/pre-commit'
+    - '$HOME/.cache/pypoetry'
+
+env:
+  global:
+    - secure: ''
+
+before_install:
+  - pip install poetry pre-commit
+
+install:
+  - poetry install
+
+script:
+  - poetry run invoke test
+
+before_deploy:
+  - poetry config pypi-token.pypi $PYPI_PASSWORD
+
+deploy:
+  - provider: script
+    skip_existing: true
+    script: poetry publish --build
+    on:
+      branch: master
+      tags: true
+      condition: '$TRAVIS_PYTHON_VERSION == 3.8'
