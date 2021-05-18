@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from functools import cached_property
 from hashlib import sha256
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -61,7 +61,7 @@ class MockProvider:
     def __init__(self, iss: str = "https://example.com", aud: str = "default_audience"):
         self.iss = iss
         self.aud = aud
-        self.keys = []
+        self.keys: List[RSAPrivateKeyWrapper] = []
         self.generate_new_key()
 
     def generate_new_key(self):
@@ -111,8 +111,10 @@ class MockHTTPClient(HTTPClient):
 
     def __init__(self, provider: MockProvider) -> None:
         self.providers = {provider.iss: provider}
-        self.get_jwks = MagicMock(wraps=self.get_jwks)
-        self.get_openid_configuration = MagicMock(wraps=self.get_openid_configuration)
+        self.get_jwks = MagicMock(wraps=self.get_jwks)  # type: ignore
+        self.get_openid_configuration = MagicMock(  # type: ignore
+            wraps=self.get_openid_configuration
+        )
 
     async def get_json(self, url: str) -> Dict[str, Any]:
         """

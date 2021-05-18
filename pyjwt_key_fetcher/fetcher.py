@@ -1,6 +1,6 @@
 from typing import Any, Dict, Iterable, Optional
 
-import asyncstdlib as a
+import asyncstdlib as a  # type: ignore
 import jwt
 
 from pyjwt_key_fetcher.errors import JWTFormatError, JWTOpenIDConnectError
@@ -26,9 +26,10 @@ class AsyncKeyFetcher:
 
         # Apply the a.lru_cache decorator without syntactic sugar to be able to
         # customize the maxsize
-        self.get_key_by_iss_and_kid = a.lru_cache(maxsize=cache_maxsize)(
-            self.get_key_by_iss_and_kid
-        )
+        # Ignore mypy (https://github.com/python/mypy/issues/2427)
+        self.get_key_by_iss_and_kid = a.lru_cache(  # type: ignore
+            maxsize=cache_maxsize
+        )(self.get_key_by_iss_and_kid)
 
     @staticmethod
     def get_kid(token: str) -> str:
