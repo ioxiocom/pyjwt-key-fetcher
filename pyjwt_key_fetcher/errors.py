@@ -2,6 +2,10 @@ class JWTKeyFetcherError(Exception):
     """Base class for JWTKeyFetcher errors"""
 
 
+class JWTInvalidIssuerError(JWTKeyFetcherError):
+    """Raised if the issuer is not valid"""
+
+
 class JWTFormatError(JWTKeyFetcherError):
     """Raised for keys that do not contain all kind of expected values"""
 

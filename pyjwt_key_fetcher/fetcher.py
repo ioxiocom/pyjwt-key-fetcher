@@ -3,7 +3,11 @@ from typing import Any, Dict, Iterable, Optional
 import asyncstdlib as a  # type: ignore
 import jwt
 
-from pyjwt_key_fetcher.errors import JWTFormatError, JWTOpenIDConnectError
+from pyjwt_key_fetcher.errors import (
+    JWTFormatError,
+    JWTInvalidIssuerError,
+    JWTOpenIDConnectError,
+)
 from pyjwt_key_fetcher.http_client import DefaultHTTPClient, HTTPClient
 from pyjwt_key_fetcher.key import Key
 
@@ -48,6 +52,16 @@ class AsyncKeyFetcher:
             raise JWTFormatError("Missing 'kid' in header")
         return kid
 
+    def _validate_issuer(self, issuer: str) -> None:
+        """
+        Ensure the issuer is amongst the valid ones or raise an exception.
+
+        :param issuer: The iss from the token
+        :raise JWTInvalidIssuerError: If the issuer is not valid
+        """
+        if self.valid_issuers and issuer not in self.valid_issuers:
+            raise JWTInvalidIssuerError(f"Invalid 'iss': '{issuer}'")
+
     def _get_issuer(self, token: str) -> str:
         """
         Get the issuer from the token (without verification).
@@ -62,9 +76,6 @@ class AsyncKeyFetcher:
             issuer = payload["iss"]
         except KeyError:
             raise JWTFormatError("Missing 'iss' in payload")
-
-        if self.valid_issuers and issuer not in self.valid_issuers:
-            raise JWTFormatError(f"Invalid 'iss' in payload: '{issuer}'")
 
         return issuer
 
@@ -130,6 +141,7 @@ class AsyncKeyFetcher:
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
         """
+        self._validate_issuer(iss)
         jwks = await self._get_jwks(iss)
         return Key(jwks[kid])
 

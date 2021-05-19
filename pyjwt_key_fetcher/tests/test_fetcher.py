@@ -1,7 +1,7 @@
 import jwt
 import pytest
 
-from pyjwt_key_fetcher.errors import JWTFormatError
+from pyjwt_key_fetcher.errors import JWTInvalidIssuerError
 
 
 @pytest.mark.asyncio
@@ -95,7 +95,7 @@ async def test_issuer_validation(create_provider_fetcher_and_client, create_prov
     invalid_token = invalid_provider.create_token()
     valid_token = valid_provider.create_token()
 
-    with pytest.raises(JWTFormatError):
+    with pytest.raises(JWTInvalidIssuerError):
         await fetcher.get_key(invalid_token)
     assert client.get_openid_configuration.call_count == 0
     assert client.get_jwks.call_count == 0
