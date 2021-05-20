@@ -6,6 +6,10 @@ class JWTInvalidIssuerError(JWTKeyFetcherError):
     """Raised if the issuer is not valid"""
 
 
+class JWTKeyNotFoundError(JWTKeyFetcherError):
+    """Raised if no key could be found"""
+
+
 class JWTFormatError(JWTKeyFetcherError):
     """Raised for keys that do not contain all kind of expected values"""
 

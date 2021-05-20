@@ -1,7 +1,9 @@
 import jwt
 import pytest
 
-from pyjwt_key_fetcher.errors import JWTInvalidIssuerError
+import pyjwt_key_fetcher
+import pyjwt_key_fetcher.openid_provider
+from pyjwt_key_fetcher.errors import JWTInvalidIssuerError, JWTKeyNotFoundError
 
 
 @pytest.mark.asyncio
@@ -49,7 +51,15 @@ async def test_fetching_after_issuing_new_key(create_provider_fetcher_and_client
     token_2 = provider.create_token()
     assert fetcher.get_kid(token) != fetcher.get_kid(token_2)
 
-    # Check the new token can be verified
+    # There's a ttl cache on the function to fetch JWKs, so validating the new
+    # key should fail until that has expired
+    with pytest.raises(JWTKeyNotFoundError):
+        await fetcher.get_key(token_2)
+
+    # Let's simulate the cache expired
+    await pyjwt_key_fetcher.openid_provider.OpenIDProvider._fetch_jwk_map.cache.clear()
+
+    # Now the the new token can be verified
     key_entry_2 = await fetcher.get_key(token_2)
     jwt.decode(token_2, audience=provider.aud, **key_entry_2)
 
@@ -57,8 +67,8 @@ async def test_fetching_after_issuing_new_key(create_provider_fetcher_and_client
     key_entry = await fetcher.get_key(token)
     jwt.decode(token, audience=provider.aud, **key_entry)
 
-    # Verify we've fetched config and JWKs only twice (once per "kid")
-    assert client.get_openid_configuration.call_count == 2
+    # Verify we've fetched config only once and JWKs twice (once per "kid")
+    assert client.get_openid_configuration.call_count == 1
     assert client.get_jwks.call_count == 2
 
 

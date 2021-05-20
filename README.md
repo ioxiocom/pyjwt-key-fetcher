@@ -53,12 +53,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    # Starting from Python 3.7 ->
-    # asyncio.run(main())
-
-    # Compatible with Python 3.6 ->
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
 ```
 
 ### Options
@@ -72,17 +67,24 @@ when creating the `AsyncKeyFetcher`, like this:
 AsyncKeyFetcher(valid_issuers=["https://example.com"])
 ```
 
-#### Adjusting cache size
+#### Adjusting caching
 
-The `AsyncKeyFetcher` uses an LRU cache, and defaults to a cache size of 128. You can
-override it like this:
+The `AsyncKeyFetcher` will by default cache data for up to 32 different issuers with a
+TTL of 3600 seconds (1 hour) each. This means that in case of key-revocation, the key
+will be trusted for up to 1 hour after it was removed from the JWKs.
+
+If a previously unseen kid for an already seen issuer is seen, it will trigger a
+re-fetch of the JWKs, provided they have not been fetched in the past 5 minutes, in
+order to rather quickly react to new keys being published.
+
+The amount of issuers to cache data for, as well as the cache time for the data can be
+adjusted like this:
 
 ```python
-AsyncKeyFetcher(cache_maxsize=2)
+AsyncKeyFetcher(cache_maxsize=10, cache_ttl=2*60*60)
 ```
 
-Note that only the found keys are cached. In other words, the
-`.well-known/openid-configuration` or `jwks_uri` are not cached.
+The minimum interval for checking for new keys can for now not be adjusted.
 
 #### Using your own HTTP Client
 

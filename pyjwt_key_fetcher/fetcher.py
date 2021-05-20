@@ -1,15 +1,12 @@
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, MutableMapping, Optional
 
-import asyncstdlib as a  # type: ignore
 import jwt
+from cachetools import TTLCache
 
-from pyjwt_key_fetcher.errors import (
-    JWTFormatError,
-    JWTInvalidIssuerError,
-    JWTOpenIDConnectError,
-)
+from pyjwt_key_fetcher.errors import JWTFormatError, JWTInvalidIssuerError
 from pyjwt_key_fetcher.http_client import DefaultHTTPClient, HTTPClient
 from pyjwt_key_fetcher.key import Key
+from pyjwt_key_fetcher.openid_provider import OpenIDProvider
 
 
 class AsyncKeyFetcher:
@@ -17,23 +14,22 @@ class AsyncKeyFetcher:
         self,
         valid_issuers: Optional[Iterable] = None,
         http_client: HTTPClient = None,
-        cache_maxsize: int = 128,
+        cache_ttl: int = 3600,
+        cache_maxsize: int = 32,
     ) -> None:
 
         if not http_client:
             http_client = DefaultHTTPClient()
-        self.http_client = http_client
 
         if not valid_issuers:
             valid_issuers = set()
-        self.valid_issuers = set(valid_issuers)
 
-        # Apply the a.lru_cache decorator without syntactic sugar to be able to
-        # customize the maxsize
-        # Ignore mypy (https://github.com/python/mypy/issues/2427)
-        self.get_key_by_iss_and_kid = a.lru_cache(  # type: ignore
-            maxsize=cache_maxsize
-        )(self.get_key_by_iss_and_kid)
+        self._http_client = http_client
+        self._valid_issuers = set(valid_issuers)
+        self._cache: MutableMapping[str, OpenIDProvider] = TTLCache(
+            maxsize=cache_maxsize,
+            ttl=cache_ttl,
+        )
 
     @staticmethod
     def get_kid(token: str) -> str:
@@ -56,13 +52,14 @@ class AsyncKeyFetcher:
         """
         Ensure the issuer is amongst the valid ones or raise an exception.
 
-        :param issuer: The iss from the token
-        :raise JWTInvalidIssuerError: If the issuer is not valid
+        :param issuer: The iss from the token.
+        :raise JWTInvalidIssuerError: If the issuer is not valid.
         """
-        if self.valid_issuers and issuer not in self.valid_issuers:
+        if self._valid_issuers and issuer not in self._valid_issuers:
             raise JWTInvalidIssuerError(f"Invalid 'iss': '{issuer}'")
 
-    def _get_issuer(self, token: str) -> str:
+    @staticmethod
+    def get_issuer(token: str) -> str:
         """
         Get the issuer from the token (without verification).
 
@@ -79,57 +76,33 @@ class AsyncKeyFetcher:
 
         return issuer
 
-    async def _get_openid_configuration(self, iss: str) -> Dict[str, Any]:
+    def _get_openid_provider(self, iss: str) -> OpenIDProvider:
+        """
+        Get the OpenID provider from the cache, or create a new one if it's missing.
+
+        :param iss: The issuer.
+        :return: The OpenIDProvider.
+        """
+        self._validate_issuer(iss)
+        try:
+            openid_provider = self._cache[iss]
+        except KeyError:
+            openid_provider = OpenIDProvider(iss, self._http_client)
+            self._cache[iss] = openid_provider
+
+        return openid_provider
+
+    async def get_openid_configuration(self, iss: str) -> Dict[str, Any]:
         """
         Get the OpenID configuration based on the issuer.
 
         :param iss: The issuer of the token.
         :return: The OpenID Configuration as a dictionary.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
+        :raise JWTInvalidIssuerError: If the issuer is not valid.
         """
-        if iss.endswith("/"):
-            iss = iss[:-1]
-        url = f"{iss}/.well-known/openid-configuration"
-        data = await self.http_client.get_json(url)
-        return data
-
-    async def _get_jwks_uri_from_iss(self, iss) -> str:
-        """
-        Retrieve the uri to jwks.
-
-        :param iss: The issuer
-        :return: The uri to the jwks
-        :raise JWTHTTPFetchError: If there's a problem fetching the data.
-        :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
-        """
-        conf = await self._get_openid_configuration(iss)
-        try:
-            jwks_uri = conf["jwks_uri"]
-        except KeyError as e:
-            raise JWTOpenIDConnectError(
-                "Missing 'jwks_uri' in OpenID Connect configuration"
-            ) from e
-        return jwks_uri
-
-    async def _get_jwks(self, iss: str) -> Dict[str, Dict[str, Any]]:
-        """
-        Get all jwks for an issuer as a dictionary with kid as key.
-
-        :param iss: The issuer
-        :return: A mapping of kid: {<data_for_the_kid>}
-        :raise JWTHTTPFetchError: If there's a problem fetching the data.
-        :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
-        """
-        jwks_uri = await self._get_jwks_uri_from_iss(iss)
-        data = await self.http_client.get_json(jwks_uri)
-        try:
-            jwks_list = data["keys"]
-        except KeyError as e:
-            raise JWTOpenIDConnectError(f"Missing 'jwks' in {jwks_uri}") from e
-
-        jwk_map = {jwk["kid"]: jwk for jwk in jwks_list}
-
-        return jwk_map
+        provider = self._get_openid_provider(iss)
+        return await provider.get_openid_configuration()
 
     async def get_key_by_iss_and_kid(self, iss: str, kid: str) -> Key:
         """
@@ -139,11 +112,11 @@ class AsyncKeyFetcher:
         :param kid: The "kid" (key id) from the header of the JWT.
         :return: The key.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
+        :raise JWTKeyNotFoundError: If the kid is not found in the "jwks_uri"
         :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
         """
-        self._validate_issuer(iss)
-        jwks = await self._get_jwks(iss)
-        return Key(jwks[kid])
+        provider = self._get_openid_provider(iss)
+        return await provider.get_key(kid)
 
     async def get_key(self, token: str) -> Key:
         """
@@ -154,10 +127,11 @@ class AsyncKeyFetcher:
         :raise JWTFormatException: If the token doesn't have a "kid".
         :raise JWTFormatException: If the token doesn't have a valid "iss".
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
+        :raise JWTInvalidIssuerError: If the issuer is not valid.
         :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
         :raise PyJWTError: If the token can't be decoded.
         """
         kid = self.get_kid(token)
-        iss = self._get_issuer(token)
+        iss = self.get_issuer(token)
         key = await self.get_key_by_iss_and_kid(iss=iss, kid=kid)
         return key
