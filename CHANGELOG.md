@@ -13,5 +13,5 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Everything for the initial release
 
-[unreleased]: https://github.com/digitalliving/firedantic/compare/0.1.0...HEAD
-[0.1.0]: https://github.com/digitalliving/firedantic/releases/tag/0.1.0
+[unreleased]: https://github.com/digitalliving/pyjwt-key-fetcher/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/digitalliving/pyjwt-key-fetcher/releases/tag/0.1.0
