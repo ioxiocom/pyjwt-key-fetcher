@@ -1,6 +1,10 @@
 # pyjwt-key-fetcher
 
 [![Build Status](https://travis-ci.com/digitalliving/pyjwt-key-fetcher.svg?branch=master)](https://travis-ci.com/digitalliving/pyjwt-key-fetcher)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPI](https://img.shields.io/pypi/v/pyjwt-key-fetcher)](https://pypi.org/project/pyjwt-key-fetcher/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyjwt-key-fetcher)](https://pypi.org/project/arangodantic/)
+[![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 Async library to fetch JWKs for JWT tokens.
 
