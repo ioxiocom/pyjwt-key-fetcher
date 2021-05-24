@@ -1,3 +1,4 @@
+import json
 from contextlib import asynccontextmanager
 from typing import Optional
 from unittest.mock import AsyncMock
@@ -16,7 +17,7 @@ async def test_get_json_wrong_protocol():
         await client.get_json("ftp://example.com")
 
 
-async def create_fake_session(
+def create_fake_session(
     payload: Optional[dict] = None,
     status_code: int = 200,
     exception: Optional[Exception] = None,
@@ -51,7 +52,7 @@ async def test_get_valid_json():
     payload = {"hi": "there"}
 
     client = DefaultHTTPClient()
-    client.session = await create_fake_session(payload)
+    client.session = create_fake_session(payload)
     assert payload == await client.get_json("https://example.com")
 
 
@@ -60,14 +61,23 @@ async def test_get_not_200():
     payload = {"OH NO!": "NOT 200 OK"}
 
     client = DefaultHTTPClient()
-    client.session = await create_fake_session(payload, status_code=404)
+    client.session = create_fake_session(payload, status_code=404)
     with pytest.raises(JWTHTTPFetchError):
         await client.get_json("https://example.com")
 
 
+@pytest.mark.parametrize(
+    "exception",
+    [
+        aiohttp.ClientError(),
+        json.JSONDecodeError(
+            "Expecting property name enclosed in double quotes", "{", 1
+        ),
+    ],
+)
 @pytest.mark.asyncio
-async def test_get_aio_error():
+async def test_get_aio_error(exception):
     client = DefaultHTTPClient()
-    client.session = await create_fake_session(exception=aiohttp.ClientError())
+    client.session = create_fake_session(exception=exception)
     with pytest.raises(JWTHTTPFetchError):
         await client.get_json("https://example.com")

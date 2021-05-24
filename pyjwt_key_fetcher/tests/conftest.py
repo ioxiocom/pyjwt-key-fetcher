@@ -121,7 +121,7 @@ class MockHTTPClient(HTTPClient):
         Get and parse JSON data from a URL.
 
         :param url: The URL to fetch the data from.
-        :return: The JSON Data as a dictionary.
+        :return: The JSON data as a dictionary.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         """
         if not (url.startswith("https://") or url.startswith("http://")):

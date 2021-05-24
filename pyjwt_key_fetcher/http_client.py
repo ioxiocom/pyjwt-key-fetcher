@@ -1,4 +1,5 @@
 import abc
+from json import JSONDecodeError
 from typing import Any, Dict
 
 import aiohttp
@@ -18,7 +19,7 @@ class HTTPClient(abc.ABC):
         Get and parse JSON data from a URL.
 
         :param url: The URL to fetch the data from.
-        :return: The JSON Data as a dictionary.
+        :return: The JSON data as a dictionary.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         """
         raise NotImplementedError
@@ -37,8 +38,8 @@ class DefaultHTTPClient(HTTPClient):
         Get and parse JSON data from a URL.
 
         :param url: The URL to fetch the data from.
-        :return: The JSON Data as a dictionary.
-        :raise JWTHTTPFetchError: If there's a problem fetching the data.
+        :return: The JSON data as a dictionary.
+        :raise JWTHTTPFetchError: If there's a problem fetching or decoding the data.
         """
         if not (url.startswith("https://") or url.startswith("http://")):
             raise JWTHTTPFetchError("Unsupported protocol in 'iss'")
@@ -48,7 +49,7 @@ class DefaultHTTPClient(HTTPClient):
                 data = await resp.json()
                 if resp.status != 200:
                     raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
-        except aiohttp.ClientError as e:
+        except (aiohttp.ClientError, JSONDecodeError) as e:
             raise JWTHTTPFetchError(f"Failed to fetch or decode {url}") from e
 
         return data
