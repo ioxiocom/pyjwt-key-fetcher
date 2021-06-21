@@ -18,7 +18,9 @@ class Key(collections.abc.Mapping):
         self.__kid = pyjwt.key_id
 
         self.key: PyJWK = pyjwt.key
-        self.algorithms = [jwk_data["alg"]]
+        self.algorithms = []
+        if "alg" in jwk_data:
+            self.algorithms.append(jwk_data["alg"])
 
     @property
     def dct(self) -> Dict[str, Any]:
