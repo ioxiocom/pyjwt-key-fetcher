@@ -29,6 +29,6 @@ deploy:
     skip_existing: true
     script: poetry publish --build
     on:
-      branch: master
+      branch: main
       tags: true
       condition: '$TRAVIS_PYTHON_VERSION == 3.8'
