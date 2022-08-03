@@ -1,6 +1,6 @@
 # pyjwt-key-fetcher
 
-[![Build Status](https://travis-ci.com/digitalliving/pyjwt-key-fetcher.svg?branch=main)](https://travis-ci.com/digitalliving/pyjwt-key-fetcher)
+[![Build Status](https://travis-ci.com/ioxiocom/pyjwt-key-fetcher.svg?branch=main)](https://travis-ci.com/ioxiocom/pyjwt-key-fetcher)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/pyjwt-key-fetcher)](https://pypi.org/project/pyjwt-key-fetcher/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyjwt-key-fetcher)](https://pypi.org/project/pyjwt-key-fetcher/)
