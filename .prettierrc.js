@@ -1,17 +1,17 @@
 module.exports = {
   printWidth: 88,
-  trailingComma: 'es5',
+  trailingComma: "es5",
   useTabs: false,
   tabWidth: 2,
   semi: false,
-  singleQuote: true,
-  endOfLine: 'lf',
-  proseWrap: 'always',
+  singleQuote: false,
+  endOfLine: "lf",
+  proseWrap: "always",
   overrides: [
     {
-      files: '*.yaml',
+      files: "*.yaml",
       options: {
-        proseWrap: 'preserve',
+        proseWrap: "preserve",
       },
     },
   ],
