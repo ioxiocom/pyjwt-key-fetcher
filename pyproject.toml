@@ -17,6 +17,10 @@ aiohttp = {version = "^3.8.1", extras = ["speedups"]}
 cachetools = "^5.2.0"
 aiocache = "^0.11.1"
 
+[tool.skjold]
+report_only = false
+sources = ["pyup", "gemnasium"]
+
 [tool.poetry.dev-dependencies]
 invoke = "^1.7.1"
 mypy = "^0.971"
