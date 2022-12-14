@@ -1,7 +1,5 @@
 from typing import Any, Dict, Optional
 
-import aiocache  # type: ignore
-
 from pyjwt_key_fetcher.errors import JWTKeyNotFoundError, JWTOpenIDConnectError
 from pyjwt_key_fetcher.http_client import HTTPClient
 from pyjwt_key_fetcher.key import Key
@@ -12,7 +10,6 @@ class OpenIDProvider:
         self.iss = iss
         self.http_client = http_client
         self._openid_configuration: Optional[Dict[str, Any]] = None
-        self._jwk_map: Dict[str, Dict[str, Any]] = {}
         self.keys: Dict[str, Key] = {}
 
     async def get_openid_configuration(self) -> Dict[str, Any]:
@@ -45,12 +42,9 @@ class OpenIDProvider:
             ) from e
         return jwks_uri
 
-    @aiocache.cached(ttl=300)
     async def _fetch_jwk_map(self) -> Dict[str, Dict[str, Any]]:
         """
         Get all JWKs for an issuer as a dictionary with kid as key.
-
-        Rate limited to once per 5 minutes (300 seconds).
 
         :return: A mapping of {kid: {<data_for_the_kid>}, ...}
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
@@ -77,10 +71,9 @@ class OpenIDProvider:
         :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
         :raise JWTKeyNotFoundError: If no matching kid was found.
         """
-        if kid not in self._jwk_map:
-            self._jwk_map = await self._fetch_jwk_map()
+        jwk_map = await self._fetch_jwk_map()
         try:
-            return self._jwk_map[kid]
+            return jwk_map[kid]
         except KeyError:
             raise JWTKeyNotFoundError
 
@@ -94,8 +87,7 @@ class OpenIDProvider:
         :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
         :raise JWTKeyNotFoundError: If no matching kid was found.
         """
-        if kid not in self.keys:
-            key = Key(await self.get_jwk_data(kid))
-            self.keys[kid] = key
+        key = Key(await self.get_jwk_data(kid))
+        self.keys[kid] = key
 
         return self.keys[kid]

@@ -2,6 +2,7 @@ import abc
 from json import JSONDecodeError
 from typing import Any, Dict
 
+import aiocache
 import aiohttp
 
 from pyjwt_key_fetcher.errors import JWTHTTPFetchError
@@ -33,9 +34,12 @@ class DefaultHTTPClient(HTTPClient):
     def __init__(self):
         self.session = aiohttp.ClientSession()
 
+    @aiocache.cached(ttl=300)
     async def get_json(self, url: str) -> Dict[str, Any]:
         """
         Get and parse JSON data from a URL.
+
+        Rate limited to once per 5 minutes (300 seconds).
 
         :param url: The URL to fetch the data from.
         :return: The JSON data as a dictionary.
