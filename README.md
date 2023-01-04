@@ -1,6 +1,6 @@
 # pyjwt-key-fetcher
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ioxiocom/pyjwt-key-fetcher/Build%20and%20upload%20to%20PyPI)](https://github.com/ioxiocom/pyjwt-key-fetcher/actions/workflows/publish.yaml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ioxiocom/pyjwt-key-fetcher/publish.yaml)](https://github.com/ioxiocom/pyjwt-key-fetcher/actions/workflows/publish.yaml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI](https://img.shields.io/pypi/v/pyjwt-key-fetcher)](https://pypi.org/project/pyjwt-key-fetcher/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyjwt-key-fetcher)](https://pypi.org/project/pyjwt-key-fetcher/)
