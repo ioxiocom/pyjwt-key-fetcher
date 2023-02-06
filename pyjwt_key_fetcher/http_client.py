@@ -9,8 +9,8 @@ from pyjwt_key_fetcher.errors import JWTHTTPFetchError
 
 class HTTPClient(abc.ABC):
     """
-    Abstract base class for HTTP Clients used to fetch the openid-configuration and
-    JWKs in JSON format.
+    Abstract base class for HTTP Clients used to fetch the configuration and JWKs in
+    JSON format.
     """
 
     @abc.abstractmethod

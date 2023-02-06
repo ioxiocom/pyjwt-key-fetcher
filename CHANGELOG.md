@@ -7,6 +7,22 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.3.0] - 2023-02-07
+
+### Changed
+
+- BREAKING CHANGES: Removed all explicit references to OpenID Connect in names of
+  methods, classes and exceptions. The most important changes:
+  - `get_openid_configuration` -> `get_configuration`
+  - `JWTOpenIDConnectError` -> `JWTProviderConfigError` and `JWTProviderJWKSError`
+  - `OpenIDProvider` -> `Provider`
+- Updated all dependencies and pre-commit hooks to the latest versions.
+
+### Added
+
+- Functionality to override the path from which the (OpenID or other) configuration is
+  loaded.
+
 ## [0.2.0] - 2022-08-05
 
 ### Changed
@@ -31,7 +47,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Everything for the initial release
 
-[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.2.0...HEAD
+[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.3.0...HEAD
+[0.2.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/releases/tag/0.1.0

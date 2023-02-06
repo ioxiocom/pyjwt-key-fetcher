@@ -18,5 +18,9 @@ class JWTHTTPFetchError(JWTKeyFetcherError):
     """Raised if there's a problem doing http(s) requests"""
 
 
-class JWTOpenIDConnectError(JWTKeyFetcherError):
-    """Raised if expectations for OpenID Connect fields fail"""
+class JWTProviderConfigError(JWTKeyFetcherError):
+    """Raised if expectations for configuration fields fail"""
+
+
+class JWTProviderJWKSError(JWTKeyFetcherError):
+    """Raised if expectations for JWKS fields fail"""
