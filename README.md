@@ -19,7 +19,7 @@ This should give similar ability to verify keys as for example
 automatically reach out and retrieve the key for you.
 
 The `AsyncKeyFetcher` provided by this library acts as an improved async replacement for
-[PyJWKClient](https://pyjwt.readthedocs.io/en/2.1.0/usage.html#retrieve-rsa-signing-keys-from-a-jwks-endpoint).
+[PyJWKClient](https://pyjwt.readthedocs.io/en/2.6.0/usage.html#retrieve-rsa-signing-keys-from-a-jwks-endpoint).
 
 ## Installation
 
@@ -44,7 +44,7 @@ from pyjwt_key_fetcher import AsyncKeyFetcher
 async def main():
     fetcher = AsyncKeyFetcher()
     # Token and options copied from
-    # https://pyjwt.readthedocs.io/en/2.1.0/usage.html#retrieve-rsa-signing-keys-from-a-jwks-endpoint
+    # https://pyjwt.readthedocs.io/en/2.6.0/usage.html#retrieve-rsa-signing-keys-from-a-jwks-endpoint
     token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik5FRTFRVVJCT1RNNE16STVSa0ZETlRZeE9UVTFNRGcyT0Rnd1EwVXpNVGsxUWpZeVJrUkZRdyJ9.eyJpc3MiOiJodHRwczovL2Rldi04N2V2eDlydS5hdXRoMC5jb20vIiwic3ViIjoiYVc0Q2NhNzl4UmVMV1V6MGFFMkg2a0QwTzNjWEJWdENAY2xpZW50cyIsImF1ZCI6Imh0dHBzOi8vZXhwZW5zZXMtYXBpIiwiaWF0IjoxNTcyMDA2OTU0LCJleHAiOjE1NzIwMDY5NjQsImF6cCI6ImFXNENjYTc5eFJlTFdVejBhRTJINmtEME8zY1hCVnRDIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.PUxE7xn52aTCohGiWoSdMBZGiYAHwE5FYie0Y1qUT68IHSTXwXVd6hn02HTah6epvHHVKA2FqcFZ4GGv5VTHEvYpeggiiZMgbxFrmTEY0csL6VNkX1eaJGcuehwQCRBKRLL3zKmA5IKGy5GeUnIbpPHLHDxr-GXvgFzsdsyWlVQvPX2xjeaQ217r2PtxDeqjlf66UYl6oY6AqNS8DH3iryCvIfCcybRZkc_hdy-6ZMoKT6Piijvk_aXdm7-QQqKJFHLuEqrVSOuBqqiNfVrG27QzAPuPOxvfXTVLXL2jek5meH6n-VWgrBdoMFH93QEszEDowDAEhQPHVs0xj7SIzA"
     key_entry = await fetcher.get_key(token)
     token = jwt.decode(
@@ -89,6 +89,19 @@ AsyncKeyFetcher(cache_maxsize=10, cache_ttl=2*60*60)
 ```
 
 The minimum interval for checking for new keys can for now not be adjusted.
+
+#### Loading configuration from a custom path
+
+You can change from which path the configuration is loaded from the issuer (`iss`). By
+default, the configuration is assumed to be an OpenID Connect configuration and to be
+loaded from `/.well-known/openid-configuration`. As long as the configuration contains a
+`jwks_uri` you can change the configuration to be loaded from a custom path.
+
+You can override the config path when creating the `AsyncKeyFetcher` like this:
+
+```python
+AsyncKeyFetcher(config_path="/.well-known/dataspace/party-configuration.json")
+```
 
 #### Using your own HTTP Client
 

@@ -6,17 +6,30 @@ from cachetools import TTLCache
 from pyjwt_key_fetcher.errors import JWTFormatError, JWTInvalidIssuerError
 from pyjwt_key_fetcher.http_client import DefaultHTTPClient, HTTPClient
 from pyjwt_key_fetcher.key import Key
-from pyjwt_key_fetcher.openid_provider import OpenIDProvider
+from pyjwt_key_fetcher.provider import Provider
 
 
 class AsyncKeyFetcher:
     def __init__(
         self,
         valid_issuers: Optional[Iterable] = None,
-        http_client: HTTPClient = None,
+        http_client: Optional[HTTPClient] = None,
         cache_ttl: int = 3600,
         cache_maxsize: int = 32,
+        config_path: str = "/.well-known/openid-configuration",
     ) -> None:
+        """
+        Initialize a new AsyncKeyFetcher.
+
+        :param valid_issuers: Valid issuers, use None to not enforce any restrictions.
+        :param http_client: A HTTPClient used to fetch JSON data, such as the
+        configuration and JWKs.
+        :param cache_ttl: The time-to-live value in seconds for cached items.
+        :param cache_maxsize: The maximum size of the cache.
+        :param config_path: The path from which the configuration is fetched from the
+        issuer.
+        """
+        self.config_path = config_path
 
         if not http_client:
             http_client = DefaultHTTPClient()
@@ -26,7 +39,7 @@ class AsyncKeyFetcher:
 
         self._http_client = http_client
         self._valid_issuers = set(valid_issuers)
-        self._cache: MutableMapping[str, OpenIDProvider] = TTLCache(
+        self._cache: MutableMapping[str, Provider] = TTLCache(
             maxsize=cache_maxsize,
             ttl=cache_ttl,
         )
@@ -76,33 +89,33 @@ class AsyncKeyFetcher:
 
         return issuer
 
-    def _get_openid_provider(self, iss: str) -> OpenIDProvider:
+    def _get_provider(self, iss: str) -> Provider:
         """
-        Get the OpenID provider from the cache, or create a new one if it's missing.
+        Get the provider from the cache, or create a new one if it's missing.
 
         :param iss: The issuer.
-        :return: The OpenIDProvider.
+        :return: The Provider.
         """
         self._validate_issuer(iss)
         try:
-            openid_provider = self._cache[iss]
+            provider = self._cache[iss]
         except KeyError:
-            openid_provider = OpenIDProvider(iss, self._http_client)
-            self._cache[iss] = openid_provider
+            provider = Provider(iss, self._http_client, self.config_path)
+            self._cache[iss] = provider
 
-        return openid_provider
+        return provider
 
-    async def get_openid_configuration(self, iss: str) -> Dict[str, Any]:
+    async def get_configuration(self, iss: str) -> Dict[str, Any]:
         """
-        Get the OpenID configuration based on the issuer.
+        Get the configuration from the issuer.
 
         :param iss: The issuer of the token.
-        :return: The OpenID Configuration as a dictionary.
+        :return: The configuration as a dictionary.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         :raise JWTInvalidIssuerError: If the issuer is not valid.
         """
-        provider = self._get_openid_provider(iss)
-        return await provider.get_openid_configuration()
+        provider = self._get_provider(iss)
+        return await provider.get_configuration()
 
     async def get_key_by_iss_and_kid(self, iss: str, kid: str) -> Key:
         """
@@ -113,9 +126,9 @@ class AsyncKeyFetcher:
         :return: The key.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         :raise JWTKeyNotFoundError: If the kid is not found in the "jwks_uri"
-        :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
+        :raise JWTProviderError: If the data doesn't contain "jwks_uri".
         """
-        provider = self._get_openid_provider(iss)
+        provider = self._get_provider(iss)
         return await provider.get_key(kid)
 
     async def get_key(self, token: str) -> Key:
@@ -128,7 +141,7 @@ class AsyncKeyFetcher:
         :raise JWTFormatException: If the token doesn't have a valid "iss".
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         :raise JWTInvalidIssuerError: If the issuer is not valid.
-        :raise JWTOpenIDConnectError: If the data doesn't contain "jwks_uri".
+        :raise JWTProviderError: If the data doesn't contain "jwks_uri".
         :raise PyJWTError: If the token can't be decoded.
         """
         kid = self.get_kid(token)

@@ -2,7 +2,7 @@ import jwt
 import pytest
 
 import pyjwt_key_fetcher
-import pyjwt_key_fetcher.openid_provider
+import pyjwt_key_fetcher.provider
 from pyjwt_key_fetcher.errors import JWTInvalidIssuerError, JWTKeyNotFoundError
 
 
@@ -14,7 +14,7 @@ async def test_fetching_key(create_provider_fetcher_and_client):
     key_entry = await fetcher.get_key(token)
     jwt.decode(token, audience=provider.aud, **key_entry)
 
-    client.get_openid_configuration.assert_called_once()
+    client.get_configuration.assert_called_once()
     client.get_jwks.assert_called_once()
 
 
@@ -28,7 +28,7 @@ async def test_fetching_same_kid_only_once(create_provider_fetcher_and_client):
             key_entry = await fetcher.get_key(token)
             jwt.decode(token, audience=provider.aud, **key_entry)
 
-            client.get_openid_configuration.assert_called_once()
+            client.get_configuration.assert_called_once()
             client.get_jwks.assert_called_once()
 
 
@@ -41,7 +41,7 @@ async def test_fetching_after_issuing_new_key(create_provider_fetcher_and_client
     key_entry = await fetcher.get_key(token)
     jwt.decode(token, audience=provider.aud, **key_entry)
 
-    client.get_openid_configuration.assert_called_once()
+    client.get_configuration.assert_called_once()
     client.get_jwks.assert_called_once()
 
     # Make the provider roll out a new key
@@ -57,7 +57,7 @@ async def test_fetching_after_issuing_new_key(create_provider_fetcher_and_client
         await fetcher.get_key(token_2)
 
     # Let's simulate the cache expired
-    await pyjwt_key_fetcher.openid_provider.OpenIDProvider._fetch_jwk_map.cache.clear()
+    await pyjwt_key_fetcher.provider.Provider._fetch_jwk_map.cache.clear()
 
     # Now the the new token can be verified
     key_entry_2 = await fetcher.get_key(token_2)
@@ -68,7 +68,7 @@ async def test_fetching_after_issuing_new_key(create_provider_fetcher_and_client
     jwt.decode(token, audience=provider.aud, **key_entry)
 
     # Verify we've fetched config only once and JWKs twice (once per "kid")
-    assert client.get_openid_configuration.call_count == 1
+    assert client.get_configuration.call_count == 1
     assert client.get_jwks.call_count == 2
 
 
@@ -89,7 +89,7 @@ async def test_fetching_from_multiple_issuers(
     jwt.decode(token_2, audience=provider_2.aud, **key_entry_2)
 
     # Verify we've fetched config and JWKs twice (once per issuer)
-    assert client.get_openid_configuration.call_count == 2
+    assert client.get_configuration.call_count == 2
     assert client.get_jwks.call_count == 2
 
 
@@ -107,11 +107,11 @@ async def test_issuer_validation(create_provider_fetcher_and_client, create_prov
 
     with pytest.raises(JWTInvalidIssuerError):
         await fetcher.get_key(invalid_token)
-    assert client.get_openid_configuration.call_count == 0
+    assert client.get_configuration.call_count == 0
     assert client.get_jwks.call_count == 0
 
     key_entry = await fetcher.get_key(valid_token)
     jwt.decode(valid_token, audience=valid_provider.aud, **key_entry)
 
-    assert client.get_openid_configuration.call_count == 1
+    assert client.get_configuration.call_count == 1
     assert client.get_jwks.call_count == 1

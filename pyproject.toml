@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "pyjwt-key-fetcher"
-version = "0.2.0"
+version = "0.3.0"
 description = "Async library to fetch JWKs for JWT tokens"
-authors = ["Digital Living International Ltd"]
+authors = ["IOXIO"]
 license = "BSD-3-Clause"
 readme = "README.md"
 repository = "https://github.com/ioxiocom/pyjwt-key-fetcher"
@@ -12,21 +12,21 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-PyJWT = {version = "^2.4.0", extras = ["crypto"]}
-aiohttp = {version = "^3.8.1", extras = ["speedups"]}
-cachetools = "^5.2.0"
-aiocache = "^0.11.1"
+PyJWT = {version = "^2.6.0", extras = ["crypto"]}
+aiohttp = {version = "^3.8.3", extras = ["speedups"]}
+cachetools = "^5.3.0"
+aiocache = "^0.12.0"
 
 [tool.skjold]
 report_only = false
 sources = ["pyup", "gemnasium"]
 
 [tool.poetry.dev-dependencies]
-invoke = "^1.7.1"
-mypy = "^0.971"
-pytest = "^7.1.2"
-pytest-asyncio = "^0.19.0"
-types-cachetools = "^5.2.1"
+invoke = "^2.0.0"
+mypy = "^0.991"
+pytest = "^7.2.1"
+pytest-asyncio = "^0.20.3"
+types-cachetools = "^5.3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

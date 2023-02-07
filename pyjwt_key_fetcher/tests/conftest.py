@@ -112,9 +112,7 @@ class MockHTTPClient(HTTPClient):
     def __init__(self, provider: MockProvider) -> None:
         self.providers = {provider.iss: provider}
         self.get_jwks = MagicMock(wraps=self.get_jwks)  # type: ignore
-        self.get_openid_configuration = MagicMock(  # type: ignore
-            wraps=self.get_openid_configuration
-        )
+        self.get_configuration = MagicMock(wraps=self.get_configuration)  # type: ignore
 
     async def get_json(self, url: str) -> Dict[str, Any]:
         """
@@ -137,7 +135,7 @@ class MockHTTPClient(HTTPClient):
             )
 
         if url == provider.iss + self.OPENID_CONFIG_PATH:
-            return self.get_openid_configuration(provider)
+            return self.get_configuration(provider)
         elif url == provider.iss + self.JWKS_URL:
             return self.get_jwks(provider)
         else:
@@ -146,7 +144,7 @@ class MockHTTPClient(HTTPClient):
     def get_jwks(self, provider: MockProvider) -> Dict[str, Any]:
         return provider.get_jwks()
 
-    def get_openid_configuration(self, provider: MockProvider) -> Dict[str, Any]:
+    def get_configuration(self, provider: MockProvider) -> Dict[str, Any]:
         return {
             "jwks_uri": provider.iss + self.JWKS_URL,
         }
