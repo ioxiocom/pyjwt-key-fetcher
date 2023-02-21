@@ -7,6 +7,17 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.4.0] - 2023-02-21
+
+### Changed
+
+- Refactored internals of the `MockHTTPClient` so it can be used with custom paths for
+  the config and jwks more easily. The `OPENID_CONFIG_PATH` and `JWKS_URL` were removed
+  and replaced with instance variables `config_path` and `jwks_path`.
+- The `create_token` in `MockProvider` can now be give extra headers to include in the
+  token.
+- Updated cryptography and aiohttp.
+
 ## [0.3.0] - 2023-02-07
 
 ### Changed
@@ -47,7 +58,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Everything for the initial release
 
-[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.3.0...HEAD
+[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.1.0...0.1.1
