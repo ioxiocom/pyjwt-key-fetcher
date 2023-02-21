@@ -11,9 +11,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- Refactored the `MockHTTPClient` so it can be used with custom paths for the config and
-  jwks. This changes mainly internal details of it and should not affect typical use.
-  However, be careful if you extend the class for your own tests.
+- Refactored internals of the `MockHTTPClient` so it can be used with custom paths for
+  the config and jwks more easily. The `OPENID_CONFIG_PATH` and `JWKS_URL` were removed
+  and replaced with instance variables `config_path` and `jwks_path`.
 - The `create_token` in `MockProvider` can now be give extra headers to include in the
   token.
 - Updated cryptography and aiohttp.
