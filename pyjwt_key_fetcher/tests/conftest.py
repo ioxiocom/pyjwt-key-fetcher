@@ -74,7 +74,11 @@ class MockProvider:
     def get_jwks(self):
         return {"keys": [key_wrapper.jwk for key_wrapper in self.keys]}
 
-    def create_token(self, payload: Optional[Dict[str, Any]] = None) -> str:
+    def create_token(
+        self,
+        payload: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """
         Create/issue a JWT token signed by this issuer.
         """
@@ -93,7 +97,11 @@ class MockProvider:
         payload = {**default_values, **payload}
 
         key = self.default_key
-        headers = {"kid": key.kid}
+
+        if not headers:
+            headers = {}
+        headers["kid"] = key.kid
+
         token = jwt.encode(
             payload=payload, key=key.privkey, algorithm=key.alg, headers=headers
         )
