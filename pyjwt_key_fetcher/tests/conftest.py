@@ -114,13 +114,17 @@ class MockHTTPClient(HTTPClient):
     A mock client used for tests.
     """
 
-    OPENID_CONFIG_PATH = "/.well-known/openid-configuration"
-    JWKS_URL = "/.well-known/jwks"
-
-    def __init__(self, provider: MockProvider) -> None:
+    def __init__(
+        self,
+        provider: MockProvider,
+        config_path: str = "/.well-known/openid-configuration",
+        jwks_path: str = "/.well-known/jwks",
+    ) -> None:
         self.providers = {provider.iss: provider}
         self.get_jwks = MagicMock(wraps=self.get_jwks)  # type: ignore
         self.get_configuration = MagicMock(wraps=self.get_configuration)  # type: ignore
+        self.config_path = config_path
+        self.jwks_path = jwks_path
 
     async def get_json(self, url: str) -> Dict[str, Any]:
         """
@@ -142,9 +146,9 @@ class MockHTTPClient(HTTPClient):
                 f"connection to '{url}'"
             )
 
-        if url == provider.iss + self.OPENID_CONFIG_PATH:
+        if url == provider.iss + self.config_path:
             return self.get_configuration(provider)
-        elif url == provider.iss + self.JWKS_URL:
+        elif url == provider.iss + self.jwks_path:
             return self.get_jwks(provider)
         else:
             raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
@@ -154,7 +158,7 @@ class MockHTTPClient(HTTPClient):
 
     def get_configuration(self, provider: MockProvider) -> Dict[str, Any]:
         return {
-            "jwks_uri": provider.iss + self.JWKS_URL,
+            "jwks_uri": provider.iss + self.jwks_path,
         }
 
 
