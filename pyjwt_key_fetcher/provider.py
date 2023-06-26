@@ -1,4 +1,5 @@
 from typing import Any, Dict, Optional
+from uuid import uuid4
 
 import aiocache  # type: ignore
 
@@ -9,6 +10,29 @@ from pyjwt_key_fetcher.errors import (
 )
 from pyjwt_key_fetcher.http_client import HTTPClient
 from pyjwt_key_fetcher.key import Key
+
+
+def key_builder(f, *args, **kwargs) -> str:
+    """
+    Custom key builder for aiocache that uses the self.uuid instead of serializing
+    self to something that contains some memory address that might get reused later,
+    like for example <pyjwt_key_fetcher.provider.Provider object at 0x120e9a070>.
+
+    This is especially a possible problem in tests that might create a lot of
+    instances and some might end up at the same memory addresses as previously
+    existing ones.
+    """
+    ordered_kwargs = sorted(kwargs.items())
+    key = (
+        f.__module__
+        + f.__name__
+        + "."
+        + str(args[0].uuid)
+        + "."
+        + str(args[1:])
+        + str(ordered_kwargs)
+    )
+    return key
 
 
 class Provider:
@@ -24,6 +48,7 @@ class Provider:
         self._jwk_map: Dict[str, Dict[str, Any]] = {}
         self.keys: Dict[str, Key] = {}
         self.config_path = config_path
+        self.uuid = uuid4()
 
     async def _config_uri(self) -> str:
         """
@@ -62,7 +87,7 @@ class Provider:
             raise JWTProviderConfigError("Missing 'jwks_uri' in configuration") from e
         return jwks_uri
 
-    @aiocache.cached(ttl=300)
+    @aiocache.cached(ttl=300, key_builder=key_builder)
     async def _fetch_jwk_map(self) -> Dict[str, Dict[str, Any]]:
         """
         Get all JWKs for an issuer as a dictionary with kid as key.
