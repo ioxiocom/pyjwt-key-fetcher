@@ -7,6 +7,24 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.5.0] - 2023-06-26
+
+### Fixed
+
+- In rare conditions the cache used by a `Provider` could return old data from another
+  no longer existing `Provider`. This was seen in some unit tests that created a lot of
+  `AsyncKeyFetcher` instances which created a lot of `Provider` instances. The main
+  reason to the problem was that the `aiocache` library would create the cache key using
+  a string like `<pyjwt_key_fetcher.provider.Provider object at 0x120e9a070>` that then
+  got reused by a new instance occupying the same memory address later. This is now
+  fixed by ensuring each provider instance gets a UUID and it's used in the cache key.
+  An [issue was opened in aiocache](https://github.com/aio-libs/aiocache/issues/734)
+  regarding this. This issue would likely not have affected any real world use cases.
+
+### Changed
+
+- Updated `PyJWT`, `cachetools` and `aiocache`.
+
 ## [0.4.0] - 2023-02-21
 
 ### Changed
@@ -58,7 +76,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Everything for the initial release
 
-[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.4.0...HEAD
+[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.1.1...0.2.0
