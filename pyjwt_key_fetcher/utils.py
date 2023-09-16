@@ -15,7 +15,7 @@ def unsigned_int_to_urlsafe_b64(i: int) -> str:
     Encode unsigned integers as urlsafe base64 strings.
     """
 
-    def byte_len(n):
+    def byte_len(n: int) -> int:
         length = 0
         while n > 0:
             length += 1

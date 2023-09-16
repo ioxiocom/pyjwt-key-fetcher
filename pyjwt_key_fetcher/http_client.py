@@ -30,7 +30,7 @@ class DefaultHTTPClient(HTTPClient):
     A default client implemented using aiohttp.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.session = aiohttp.ClientSession()
 
     async def get_json(self, url: str) -> Dict[str, Any]:
@@ -46,7 +46,7 @@ class DefaultHTTPClient(HTTPClient):
 
         try:
             async with self.session.get(url) as resp:
-                data = await resp.json()
+                data: Dict[str, Any] = await resp.json()
                 if resp.status != 200:
                     raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
         except (aiohttp.ClientError, JSONDecodeError) as e:
