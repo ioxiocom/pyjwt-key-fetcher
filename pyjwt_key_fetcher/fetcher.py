@@ -12,7 +12,7 @@ from pyjwt_key_fetcher.provider import Provider
 class AsyncKeyFetcher:
     def __init__(
         self,
-        valid_issuers: Optional[Iterable] = None,
+        valid_issuers: Optional[Iterable[str]] = None,
         http_client: Optional[HTTPClient] = None,
         cache_ttl: int = 3600,
         cache_maxsize: int = 32,
@@ -56,7 +56,7 @@ class AsyncKeyFetcher:
         """
         jwt_headers = jwt.get_unverified_header(token)
         try:
-            kid = jwt_headers["kid"]
+            kid: str = jwt_headers["kid"]
         except KeyError:
             raise JWTFormatError("Missing 'kid' in header")
         return kid
@@ -83,7 +83,7 @@ class AsyncKeyFetcher:
         """
         payload = jwt.decode(token, options={"verify_signature": False})
         try:
-            issuer = payload["iss"]
+            issuer: str = payload["iss"]
         except KeyError:
             raise JWTFormatError("Missing 'iss' in payload")
 

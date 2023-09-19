@@ -31,3 +31,9 @@ types-cachetools = "^5.3.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+exclude = ["pyjwt_key_fetcher/tests"]
+strict = true
+# enable once aiocache is fully typed
+disallow_untyped_decorators = false

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 from uuid import uuid4
 
 import aiocache  # type: ignore
@@ -12,7 +12,9 @@ from pyjwt_key_fetcher.http_client import HTTPClient
 from pyjwt_key_fetcher.key import Key
 
 
-def key_builder(f, *args, **kwargs) -> str:
+def key_builder(
+    f: Callable[..., Any], *args: "Provider", **kwargs: Dict[str, Any]
+) -> str:
     """
     Custom key builder for aiocache that uses the self.uuid instead of serializing
     self to something that contains some memory address that might get reused later,
@@ -82,7 +84,7 @@ class Provider:
         """
         conf = await self.get_configuration()
         try:
-            jwks_uri = conf["jwks_uri"]
+            jwks_uri: str = conf["jwks_uri"]
         except KeyError as e:
             raise JWTProviderConfigError("Missing 'jwks_uri' in configuration") from e
         return jwks_uri
