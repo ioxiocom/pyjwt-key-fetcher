@@ -1,10 +1,9 @@
-import collections.abc
-from typing import Any, Dict, Iterator
+from typing import Any, Dict, Iterator, Mapping
 
 from jwt import PyJWK
 
 
-class Key(collections.abc.Mapping[str, Any]):
+class Key(Mapping[str, Any]):
     """
     Wrapper for the JWT key and algorithm.
     """
