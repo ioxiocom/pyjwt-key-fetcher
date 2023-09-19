@@ -7,6 +7,16 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.6.0] - 2023-09-19
+
+### Changed
+
+- Mark the library as being typed.
+
+### Fixed
+
+- Security updates to libraries (aiohttp, cryptography).
+
 ## [0.5.0] - 2023-06-26
 
 ### Fixed
@@ -76,7 +86,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Everything for the initial release
 
-[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.5.0...HEAD
+[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.2.0...0.3.0
