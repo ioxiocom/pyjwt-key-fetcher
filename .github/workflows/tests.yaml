@@ -27,7 +27,7 @@ jobs:
         run: poetry install
 
       - name: Install build tools 🛠
-        run: apt-get update && apt-get install -y build-essential
+        run: sudo apt-get update && sudo apt-get install -y build-essential
 
       - name: Run pre-commit 🤔
         run: pre-commit run --all-files
