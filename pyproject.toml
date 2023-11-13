@@ -2,7 +2,7 @@
 name = "pyjwt-key-fetcher"
 version = "0.6.0"
 description = "Async library to fetch JWKs for JWT tokens"
-authors = ["IOXIO"]
+authors = ["IOXIO Ltd"]
 license = "BSD-3-Clause"
 readme = "README.md"
 repository = "https://github.com/ioxiocom/pyjwt-key-fetcher"
