@@ -59,7 +59,7 @@ async def test_fetching_after_issuing_new_key(create_provider_fetcher_and_client
     # Let's simulate the cache expired
     await pyjwt_key_fetcher.provider.Provider._fetch_jwk_map.cache.clear()
 
-    # Now the the new token can be verified
+    # Now the new token can be verified
     key_entry_2 = await fetcher.get_key(token_2)
     jwt.decode(token_2, audience=provider.aud, **key_entry_2)
 
