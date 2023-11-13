@@ -62,6 +62,7 @@ class MockProvider:
         self.iss = iss
         self.aud = aud
         self.keys: List[RSAPrivateKeyWrapper] = []
+
         self.generate_new_key()
 
     def generate_new_key(self):
