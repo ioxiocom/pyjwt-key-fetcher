@@ -115,3 +115,16 @@ async def test_issuer_validation(create_provider_fetcher_and_client, create_prov
 
     assert client.get_configuration.call_count == 1
     assert client.get_jwks.call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_static_issuer_config():
+    issuer = "https://valid.example.com"
+
+    fetcher = pyjwt_key_fetcher.AsyncKeyFetcher(
+        static_issuer_config={issuer: {"jwks_uri": f"{issuer}/.well-known/jwks.json"}}
+    )
+    provider = fetcher._get_provider(issuer)
+
+    provider_config = await provider.get_configuration()
+    assert provider_config == {"jwks_uri": f"{issuer}/.well-known/jwks.json"}
