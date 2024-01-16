@@ -6,14 +6,12 @@ authors = ["IOXIO Ltd"]
 license = "BSD-3-Clause"
 readme = "README.md"
 repository = "https://github.com/ioxiocom/pyjwt-key-fetcher"
-packages = [
-    {include="pyjwt_key_fetcher", from="."}
-]
+packages = [{ include = "pyjwt_key_fetcher", from = "." }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-PyJWT = {version = "^2.8.0", extras = ["crypto"]}
-aiohttp = {version = "^3.8.6", extras = ["speedups"]}
+PyJWT = { version = "^2.8.0", extras = ["crypto"] }
+aiohttp = { version = "^3.9.1", extras = ["speedups"] }
 cachetools = "^5.3.2"
 aiocache = "^0.12.2"
 
