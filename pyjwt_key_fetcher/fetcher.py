@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, MutableMapping, Optional
+from typing import Any, Dict, Iterable, Mapping, MutableMapping, Optional
 
 import jwt
 from cachetools import TTLCache
@@ -6,7 +6,7 @@ from cachetools import TTLCache
 from pyjwt_key_fetcher.errors import JWTFormatError, JWTInvalidIssuerError
 from pyjwt_key_fetcher.http_client import DefaultHTTPClient, HTTPClient
 from pyjwt_key_fetcher.key import Key
-from pyjwt_key_fetcher.provider import Provider
+from pyjwt_key_fetcher.provider import OpenIDConfigurationTypeDef, Provider
 
 
 class AsyncKeyFetcher:
@@ -17,6 +17,7 @@ class AsyncKeyFetcher:
         cache_ttl: int = 3600,
         cache_maxsize: int = 32,
         config_path: str = "/.well-known/openid-configuration",
+        static_issuer_config: Optional[Dict[str, OpenIDConfigurationTypeDef]] = None,
     ) -> None:
         """
         Initialize a new AsyncKeyFetcher.
@@ -28,8 +29,11 @@ class AsyncKeyFetcher:
         :param cache_maxsize: The maximum size of the cache.
         :param config_path: The path from which the configuration is fetched from the
         issuer.
+        :param static_issuer_config: A dict of static configurations for specific token
+        issuers. Fetching from config_path will be skipped for these issuers.
         """
         self.config_path = config_path
+        self.static_issuer_config = static_issuer_config or {}
 
         if not http_client:
             http_client = DefaultHTTPClient()
@@ -100,12 +104,17 @@ class AsyncKeyFetcher:
         try:
             provider = self._cache[iss]
         except KeyError:
-            provider = Provider(iss, self._http_client, self.config_path)
+            provider = Provider(
+                iss,
+                self._http_client,
+                self.config_path,
+                self.static_issuer_config.get(iss, None),
+            )
             self._cache[iss] = provider
 
         return provider
 
-    async def get_configuration(self, iss: str) -> Dict[str, Any]:
+    async def get_configuration(self, iss: str) -> Mapping[str, Any]:
         """
         Get the configuration from the issuer.
 

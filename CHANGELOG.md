@@ -7,6 +7,18 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.7.0] - 2024-01-17
+
+### Added
+
+- Support for static configurations,
+  [PR #19](https://github.com/ioxiocom/pyjwt-key-fetcher/pull/19).
+
+### Fixed
+
+- Security updates to libraries (aiohttp, cryptography).
+- Minor adjustments to error descriptions.
+
 ## [0.6.0] - 2023-09-19
 
 ### Changed
@@ -86,7 +98,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Everything for the initial release
 
-[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.6.0...HEAD
+[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.3.0...0.4.0

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Mapping, Optional, TypedDict
 from uuid import uuid4
 
 import aiocache  # type: ignore
@@ -37,16 +37,25 @@ def key_builder(
     return key
 
 
+class OpenIDConfigurationTypeDef(TypedDict):
+    """
+    Type definition for the OpenID configuration values relevant to JWT validation.
+    """
+
+    jwks_uri: str
+
+
 class Provider:
     def __init__(
         self,
         iss: str,
         http_client: HTTPClient,
         config_path: str = "/.well-known/openid-configuration",
+        static_config: Optional[OpenIDConfigurationTypeDef] = None,
     ) -> None:
         self.iss = iss
         self.http_client = http_client
-        self._configuration: Optional[Dict[str, Any]] = None
+        self._configuration: Optional[Mapping[str, Any]] = static_config
         self._jwk_map: Dict[str, Dict[str, Any]] = {}
         self.keys: Dict[str, Key] = {}
         self.config_path = config_path
@@ -61,7 +70,7 @@ class Provider:
         """
         return f"{self.iss.rstrip('/')}{self.config_path}"
 
-    async def get_configuration(self) -> Dict[str, Any]:
+    async def get_configuration(self) -> Mapping[str, Any]:
         """
         Get the configuration as a dictionary.
 
@@ -99,14 +108,14 @@ class Provider:
         :return: A mapping of {kid: {<data_for_the_kid>}, ...}
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         :raise JWTProviderConfigError: If the config doesn't contain "jwks_uri".
-        :raise JWTProviderJWKSError: If the jwks_uri is missing the "jwks".
+        :raise JWTProviderJWKSError: If the jwks_uri is missing the "keys".
         """
         jwks_uri = await self._get_jwks_uri()
         data = await self.http_client.get_json(jwks_uri)
         try:
             jwks_list = data["keys"]
         except KeyError as e:
-            raise JWTProviderJWKSError(f"Missing 'jwks' in {jwks_uri}") from e
+            raise JWTProviderJWKSError(f"Missing 'keys' in {jwks_uri}") from e
 
         jwk_map = {jwk["kid"]: jwk for jwk in jwks_list}
 
@@ -120,7 +129,7 @@ class Provider:
         :return: The raw JWK data as a dictionary.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         :raise JWTProviderConfigError: If the config doesn't contain "jwks_uri".
-        :raise JWTProviderJWKSError: If the jwks_uri is missing the "jwks".
+        :raise JWTProviderJWKSError: If the jwks_uri is missing the "keys".
         :raise JWTKeyNotFoundError: If no matching kid was found.
         """
         if kid not in self._jwk_map:
@@ -138,7 +147,7 @@ class Provider:
         :return: The Key.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
         :raise JWTProviderConfigError: If the config doesn't contain "jwks_uri".
-        :raise JWTProviderJWKSError: If the jwks_uri is missing the "jwks".
+        :raise JWTProviderJWKSError: If the jwks_uri is missing the "keys".
         :raise JWTKeyNotFoundError: If no matching kid was found.
         """
         if kid not in self.keys:
