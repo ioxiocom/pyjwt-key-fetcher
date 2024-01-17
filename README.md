@@ -103,6 +103,22 @@ You can override the config path when creating the `AsyncKeyFetcher` like this:
 AsyncKeyFetcher(config_path="/.well-known/dataspace/party-configuration.json")
 ```
 
+#### Using static configuration
+
+If you use an issuer that does not provide a configuration (they are for example missing
+the `/.well-known/openid-configuration`), you can create a static configuration to use
+for that issuer instead and in it specify the `jwks_uri` like this:
+
+```python
+AsyncKeyFetcher(
+    static_issuer_config={
+        "https://example.com": {
+            "jwks_uri": "https://example.com/.well-known/jwks.json",
+        },
+    },
+)
+```
+
 #### Using your own HTTP Client
 
 The library ships with a `DefaultHTTPClient` that uses `aiohttp` for fetching the JSON
