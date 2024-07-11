@@ -32,7 +32,7 @@ class RSAPrivateKeyWrapper:
 
     @cached_property
     def kid(self):
-        return sha256(f"rsa:{self.e}:{self.n}".encode()).hexdigest()[:32]
+        return sha256(f"rsa:{self.e}:{self.n}".encode()).hexdigest()[:32]  # noqa: E231
 
     @property
     def alg(self):
