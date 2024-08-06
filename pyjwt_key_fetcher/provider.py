@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Mapping, Optional, TypedDict
+from typing import Any, Callable, Dict, Mapping, Optional, TypedDict, Union
 from uuid import uuid4
 
 import aiocache  # type: ignore
@@ -37,12 +37,23 @@ def key_builder(
     return key
 
 
-class OpenIDConfigurationTypeDef(TypedDict):
+class JwksUriConfigurationTypeDef(TypedDict):
     """
-    Type definition for the OpenID configuration values relevant to JWT validation.
+    Type definition for an OpenID Connect compatible configuration with a jwks_uri.
     """
 
     jwks_uri: str
+
+
+class JwksUrlConfigurationTypeDef(TypedDict):
+    """
+    Type definition for a configuration using jwks_url instead of jwks_uri.
+    """
+
+    jwks_url: str
+
+
+ConfigurationTypeDef = Union[JwksUriConfigurationTypeDef, JwksUrlConfigurationTypeDef]
 
 
 class Provider:
@@ -51,7 +62,7 @@ class Provider:
         iss: str,
         http_client: HTTPClient,
         config_path: str = "/.well-known/openid-configuration",
-        static_config: Optional[OpenIDConfigurationTypeDef] = None,
+        static_config: Optional[ConfigurationTypeDef] = None,
     ) -> None:
         self.iss = iss
         self.http_client = http_client
@@ -85,17 +96,24 @@ class Provider:
 
     async def _get_jwks_uri(self) -> str:
         """
-        Retrieve the uri to JWKs.
+        Retrieve the uri/url to JWKs.
 
-        :return: The uri to the JWKs.
+        :return: The uri/url to the JWKs.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
-        :raise JWTProviderConfigError: If the config doesn't contain "jwks_uri".
+        :raise JWTProviderConfigError: If the config doesn't contain "jwks_uri" or
+        "jwks_url".
         """
         conf = await self.get_configuration()
+        jwks_uri: str
         try:
-            jwks_uri: str = conf["jwks_uri"]
+            jwks_uri = conf["jwks_uri"]
         except KeyError as e:
-            raise JWTProviderConfigError("Missing 'jwks_uri' in configuration") from e
+            try:
+                jwks_uri = conf["jwks_url"]
+            except KeyError:
+                raise JWTProviderConfigError(
+                    "Missing 'jwks_uri' and 'jwks_url' in configuration"
+                ) from e
         return jwks_uri
 
     @aiocache.cached(ttl=300, key_builder=key_builder)

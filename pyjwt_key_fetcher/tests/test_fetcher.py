@@ -6,9 +6,18 @@ import pyjwt_key_fetcher.provider
 from pyjwt_key_fetcher.errors import JWTInvalidIssuerError, JWTKeyNotFoundError
 
 
+@pytest.mark.parametrize(
+    "jwks_uri_field",
+    [
+        "jwks_uri",
+        "jwks_url",
+    ],
+)
 @pytest.mark.asyncio
-async def test_fetching_key(create_provider_fetcher_and_client):
-    provider, fetcher, client = await create_provider_fetcher_and_client()
+async def test_fetching_key(create_provider_fetcher_and_client, jwks_uri_field):
+    provider, fetcher, client = await create_provider_fetcher_and_client(
+        jwks_uri_field=jwks_uri_field,
+    )
 
     token = provider.create_token()
     key_entry = await fetcher.get_key(token)
@@ -117,14 +126,23 @@ async def test_issuer_validation(create_provider_fetcher_and_client, create_prov
     assert client.get_jwks.call_count == 1
 
 
+@pytest.mark.parametrize(
+    "jwks_uri_field",
+    [
+        "jwks_uri",
+        "jwks_url",
+    ],
+)
 @pytest.mark.asyncio
-async def test_static_issuer_config():
+async def test_static_issuer_config(jwks_uri_field):
     issuer = "https://valid.example.com"
 
     fetcher = pyjwt_key_fetcher.AsyncKeyFetcher(
-        static_issuer_config={issuer: {"jwks_uri": f"{issuer}/.well-known/jwks.json"}}
+        static_issuer_config={
+            issuer: {jwks_uri_field: f"{issuer}/.well-known/jwks.json"}
+        }
     )
     provider = fetcher._get_provider(issuer)
 
     provider_config = await provider.get_configuration()
-    assert provider_config == {"jwks_uri": f"{issuer}/.well-known/jwks.json"}
+    assert provider_config == {jwks_uri_field: f"{issuer}/.well-known/jwks.json"}

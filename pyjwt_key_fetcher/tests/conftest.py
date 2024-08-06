@@ -120,12 +120,14 @@ class MockHTTPClient(HTTPClient):
         provider: MockProvider,
         config_path: str = "/.well-known/openid-configuration",
         jwks_path: str = "/.well-known/jwks",
+        jwks_uri_field: str = "jwks_uri",
     ) -> None:
         self.providers = {provider.iss: provider}
         self.get_jwks = MagicMock(wraps=self.get_jwks)  # type: ignore
         self.get_configuration = MagicMock(wraps=self.get_configuration)  # type: ignore
         self.config_path = config_path
         self.jwks_path = jwks_path
+        self.jwks_uri_field = jwks_uri_field
 
     async def get_json(self, url: str) -> Dict[str, Any]:
         """
@@ -159,7 +161,7 @@ class MockHTTPClient(HTTPClient):
 
     def get_configuration(self, provider: MockProvider) -> Dict[str, Any]:
         return {
-            "jwks_uri": provider.iss + self.jwks_path,
+            self.jwks_uri_field: provider.iss + self.jwks_path,
         }
 
 
@@ -169,9 +171,10 @@ def create_provider_fetcher_and_client():
         valid_issuers=None,
         iss: str = "https://example.com",
         aud: str = "default_audience",
+        jwks_uri_field: str = "jwks_uri",
     ):
         provider = MockProvider(iss=iss, aud=aud)
-        http_client = MockHTTPClient(provider=provider)
+        http_client = MockHTTPClient(provider=provider, jwks_uri_field=jwks_uri_field)
         fetcher = AsyncKeyFetcher(valid_issuers=valid_issuers, http_client=http_client)
         return provider, fetcher, http_client
 

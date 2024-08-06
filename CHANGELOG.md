@@ -7,6 +7,23 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.8.0] - 2024-08-07
+
+### Added
+
+- Use `jwks_url` as a fallback if the `jwks_uri` is not defined in the configuration.
+  This makes it possible to use a broader selection of JWT providers.
+
+### Removed
+
+- `OpenIDConfigurationTypeDef` was removed, you can use `ConfigurationTypeDef` instead.
+
+### Changed
+
+- Security updates to libraries (aiohttp, idna, cryptography).
+- Updated pre-commit hooks.
+- Improvements to README.
+
 ## [0.7.0] - 2024-01-17
 
 ### Added
@@ -98,7 +115,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Everything for the initial release
 
-[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.7.0...HEAD
+[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.4.0...0.5.0
