@@ -6,7 +6,7 @@ from cachetools import TTLCache
 from pyjwt_key_fetcher.errors import JWTFormatError, JWTInvalidIssuerError
 from pyjwt_key_fetcher.http_client import DefaultHTTPClient, HTTPClient
 from pyjwt_key_fetcher.key import Key
-from pyjwt_key_fetcher.provider import OpenIDConfigurationTypeDef, Provider
+from pyjwt_key_fetcher.provider import ConfigurationTypeDef, Provider
 
 
 class AsyncKeyFetcher:
@@ -17,7 +17,7 @@ class AsyncKeyFetcher:
         cache_ttl: int = 3600,
         cache_maxsize: int = 32,
         config_path: str = "/.well-known/openid-configuration",
-        static_issuer_config: Optional[Dict[str, OpenIDConfigurationTypeDef]] = None,
+        static_issuer_config: Optional[Dict[str, ConfigurationTypeDef]] = None,
     ) -> None:
         """
         Initialize a new AsyncKeyFetcher.

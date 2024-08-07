@@ -10,9 +10,10 @@ Async library to fetch JWKs for JWT tokens.
 
 This library is intended to be used together with
 [PyJWT](https://pyjwt.readthedocs.io/en/stable/) to automatically verify keys signed by
-OpenID Connect providers. It retrieves the `iss` (issuer) and the `kid` (key ID) from
-the JWT, fetches the `.well-known/openid-configuration` from the issuer to find out the
-`jwks_uri` and fetches that to find the right key.
+for example OpenID Connect providers. It retrieves the `iss` (issuer) and the `kid` (key
+ID) from the JWT, fetches the configuration, typically from
+`.well-known/openid-configuration` (can be overridden) from the issuer to find out the
+`jwks_uri` (or `jwks_url`) and fetches that to find the right key.
 
 This should give similar ability to verify keys as for example
 [https://jwt.io/](https://jwt.io/), where you can just paste in a token, and it will
@@ -95,7 +96,8 @@ The minimum interval for checking for new keys can for now not be adjusted.
 You can change from which path the configuration is loaded from the issuer (`iss`). By
 default, the configuration is assumed to be an OpenID Connect configuration and to be
 loaded from `/.well-known/openid-configuration`. As long as the configuration contains a
-`jwks_uri` you can change the configuration to be loaded from a custom path.
+`jwks_uri` or a `jwks_url` you can change the configuration to be loaded from a custom
+path.
 
 You can override the config path when creating the `AsyncKeyFetcher` like this:
 
@@ -107,7 +109,7 @@ AsyncKeyFetcher(config_path="/.well-known/dataspace/party-configuration.json")
 
 If you use an issuer that does not provide a configuration (they are for example missing
 the `/.well-known/openid-configuration`), you can create a static configuration to use
-for that issuer instead and in it specify the `jwks_uri` like this:
+for that issuer instead and in it specify the `jwks_uri` (or `jwks_url`) like this:
 
 ```python
 AsyncKeyFetcher(
