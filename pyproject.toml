@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyjwt-key-fetcher"
-version = "0.7.0"
+version = "0.8.0"
 description = "Async library to fetch JWKs for JWT tokens"
 authors = ["IOXIO Ltd"]
 license = "BSD-3-Clause"
