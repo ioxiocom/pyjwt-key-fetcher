@@ -30,9 +30,6 @@ class DefaultHTTPClient(HTTPClient):
     A default client implemented using aiohttp.
     """
 
-    def __init__(self) -> None:
-        self.session = aiohttp.ClientSession()
-
     async def get_json(self, url: str) -> Dict[str, Any]:
         """
         Get and parse JSON data from a URL.
@@ -45,10 +42,11 @@ class DefaultHTTPClient(HTTPClient):
             raise JWTHTTPFetchError("Unsupported protocol in 'iss'")
 
         try:
-            async with self.session.get(url) as resp:
-                data: Dict[str, Any] = await resp.json()
-                if resp.status != 200:
-                    raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    data: Dict[str, Any] = await resp.json()
+                    if resp.status != 200:
+                        raise JWTHTTPFetchError(f"Failed to fetch or decode {url}")
         except (aiohttp.ClientError, JSONDecodeError) as e:
             raise JWTHTTPFetchError(f"Failed to fetch or decode {url}") from e
 
