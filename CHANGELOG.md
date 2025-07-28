@@ -7,7 +7,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [0.8.0] - 2024-08-07
+## [0.9.0] - 2025-07-28
 
 ### Added
 
@@ -20,6 +20,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- BREAKING CHANGES: dropped support for Python 3.8
+- Added python 3.12 and 3.13 support
 - Security updates to libraries (aiohttp, idna, cryptography).
 - Updated pre-commit hooks.
 - Improvements to README.

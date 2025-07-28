@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import cached_property
 from hashlib import sha256
 from typing import Any, Dict, List, Optional
@@ -86,7 +86,7 @@ class MockProvider:
         if not payload:
             payload = {}
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         default_values = {
             "sub": str(uuid4()),
             "aud": self.aud,

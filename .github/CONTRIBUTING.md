@@ -19,14 +19,12 @@ Violations may result in removal from the project and/or reporting.
    avoids wasted effort.
 
 2. **Code style & formatting:** We aim for consistent code style throughout the project.
-
    - Please run any automated formatting tools included in this repository (e.g.,
      `pre-commit`, `prettier`, `ruff`, `go fmt`). Check the `.editorconfig` or build
      scripts for details.
    - Try to follow existing coding conventions within the codebase.
 
 3. **Submit a pull request:** When you're ready to contribute:
-
    - Create a pull request against the `main` branch.
    - In your PR description, _clearly explain_:
      - **What changed?** A concise summary of your changes.
