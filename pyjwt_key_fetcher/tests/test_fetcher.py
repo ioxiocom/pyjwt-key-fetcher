@@ -146,3 +146,15 @@ async def test_static_issuer_config(jwks_uri_field):
 
     provider_config = await provider.get_configuration()
     assert provider_config == {jwks_uri_field: f"{issuer}/.well-known/jwks.json"}
+
+
+@pytest.mark.asyncio
+async def test_aclose():
+    fetcher = pyjwt_key_fetcher.AsyncKeyFetcher()
+    await fetcher.aclose()
+
+
+@pytest.mark.asyncio
+async def test_context_manager():
+    async with pyjwt_key_fetcher.AsyncKeyFetcher():
+        ...

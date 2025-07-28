@@ -1,3 +1,4 @@
+from contextlib import AbstractAsyncContextManager
 from typing import Any, Dict, Iterable, Mapping, MutableMapping, Optional
 
 import jwt
@@ -9,7 +10,7 @@ from pyjwt_key_fetcher.key import Key
 from pyjwt_key_fetcher.provider import ConfigurationTypeDef, Provider
 
 
-class AsyncKeyFetcher:
+class AsyncKeyFetcher(AbstractAsyncContextManager):
     def __init__(
         self,
         valid_issuers: Optional[Iterable[str]] = None,
@@ -157,3 +158,14 @@ class AsyncKeyFetcher:
         iss = self.get_issuer(token)
         key = await self.get_key_by_iss_and_kid(iss=iss, kid=kid)
         return key
+
+    async def aclose(self) -> None:
+        """Close the HTTP client session if applicable.
+
+        This method should be called to clean up resources.
+        """
+        await self._http_client.aclose()
+
+    async def __aexit__(self, *_exc: object) -> None:
+        """Close the HTTP client session when exiting the context manager."""
+        await self.aclose()
