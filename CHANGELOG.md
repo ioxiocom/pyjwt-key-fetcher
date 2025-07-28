@@ -7,12 +7,15 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [0.8.0] - 2024-08-07
+## [0.8.0] - 2025-07-28
 
 ### Added
 
 - Use `jwks_url` as a fallback if the `jwks_uri` is not defined in the configuration.
   This makes it possible to use a broader selection of JWT providers.
+- Added `AsyncKeyFetcher.aclose` method to close fetcher's http client directly.
+- Updated http client to use acloseable context manager, so it can be used with
+  `async with` to ensure resources are cleaned up properly.
 
 ### Removed
 

@@ -81,3 +81,16 @@ async def test_get_aio_error(exception):
     client.session = create_fake_session(exception=exception)
     with pytest.raises(JWTHTTPFetchError):
         await client.get_json("https://example.com")
+
+
+@pytest.mark.asyncio
+async def test_aclose():
+    client = DefaultHTTPClient()
+    client.session = create_fake_session()
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_context_manager():
+    async with DefaultHTTPClient() as client:
+        client.session = create_fake_session()

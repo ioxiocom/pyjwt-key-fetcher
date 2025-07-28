@@ -1,4 +1,5 @@
 import abc
+from contextlib import AbstractAsyncContextManager
 from json import JSONDecodeError
 from typing import Any, Dict
 
@@ -7,7 +8,7 @@ import aiohttp
 from pyjwt_key_fetcher.errors import JWTHTTPFetchError
 
 
-class HTTPClient(abc.ABC):
+class HTTPClient(AbstractAsyncContextManager, abc.ABC):
     """
     Abstract base class for HTTP Clients used to fetch the configuration and JWKs in
     JSON format.
@@ -21,6 +22,13 @@ class HTTPClient(abc.ABC):
         :param url: The URL to fetch the data from.
         :return: The JSON data as a dictionary.
         :raise JWTHTTPFetchError: If there's a problem fetching the data.
+        """
+        raise NotImplementedError
+
+    async def aclose(self) -> None:
+        """Close the HTTP client session if applicable.
+
+        This method should be called to clean up resources.
         """
         raise NotImplementedError
 
@@ -53,3 +61,17 @@ class DefaultHTTPClient(HTTPClient):
             raise JWTHTTPFetchError(f"Failed to fetch or decode {url}") from e
 
         return data
+
+    async def aclose(self) -> None:
+        """Close the HTTP client session if applicable.
+
+        This method should be called to clean up resources.
+        """
+        if self.session.closed:
+            return
+
+        await self.session.close()
+
+    async def __aexit__(self, *_exc: object) -> None:
+        """Close the HTTP client session when exiting the context manager."""
+        await self.aclose()
