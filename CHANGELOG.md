@@ -9,10 +9,13 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.9.0] - 2025-11-19
 
+### Removed
+
+- Removed support of Python 3.8 and 3.9.
+
 ### Changed
 
 - Security updates to libraries.
-- Removed support of Python 3.8 and 3.9.
 
 ## [0.8.0] - 2024-08-07
 
