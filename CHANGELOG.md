@@ -7,6 +7,16 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-11-20
+
+### Removed
+
+- Removed support of Python 3.8 and 3.9.
+
+### Changed
+
+- Security updates to libraries.
+
 ## [0.8.0] - 2024-08-07
 
 ### Added
@@ -115,7 +125,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Everything for the initial release
 
-[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.8.0...HEAD
+[unreleased]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/ioxiocom/pyjwt-key-fetcher/compare/0.5.0...0.6.0
